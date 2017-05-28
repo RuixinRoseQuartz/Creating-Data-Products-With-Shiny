@@ -1,0 +1,65 @@
+---
+title: "Plotting Distributions"
+author: "Ruixin"
+date: "May 28, 2017"
+output: ioslides_presentation
+---
+
+## Shiny Application With Plots
+Using the Shiny package in R, we have created an application where you can see the different common distributions repsented in a diagram. The distributions you can look at are:
+
+- Normal
+- Uniform
+- Log Normal
+- Exponential
+
+In the following slides, we will present our code and how we were able to build our Distribution Plot.
+
+## ui.R - Part 1
+To build out application, we need to write both a user interface(ui.R) and a server script (server.R). 
+
+Please notice the use of the following functions in our code:
+
+- numericInput() allows the user to enter any number
+- radioButtons() allows the user tp select different modes
+```{r, eval = FALSE}
+library(shiny)
+shinyUI(fluidPage(
+  titlePanel("Plotting Distributions"),
+    sidebarLayout(
+    sidebarPanel(
+      radioButtons("dist", "Distribution type:", c("Normal" = "norm", "Uniform" = "unif",
+                     "Log-normal" = "lnorm", "Exponential" = "exp")),
+      br(),
+...
+```
+
+## ui.R - Part 2
+```{r, eval = FALSE}
+...
+      numericInput("n", "How Many Random Numbers Should Be Plotted?", value = 1000, min = 1, 
+                   max = 1000)
+    ),
+      mainPanel(
+        h3("Distribution Plot"),
+        plotOutput("plot"),
+    ))
+))
+```
+
+## server.R
+
+```{r, eval=FALSE}
+library(shiny)
+shinyServer(function(input, output) {
+    data <- reactive({
+    dist <- switch(input$dist, norm = rnorm, unif = runif, lnorm = rlnorm, exp = rexp, rnorm)
+    dist(input$n)
+    })
+    output$plot <- renderPlot({
+    dist <- input$dist
+    n <- input$n
+    hist(data(), main=paste('r', dist, '(', n, ')', sep=''))
+  })
+})
+```
