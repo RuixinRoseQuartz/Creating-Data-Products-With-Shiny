@@ -1,0 +1,77 @@
+---
+title: "Plotting Random Numbers in Shiny"
+author: "Ruixin"
+date: "May 25, 2017"
+output: ioslides_presentation
+---
+
+## Shiny Application With Plots
+Using the Shiny package in R, we have created a plot that can plot 1 to 1,000 random variables with a minimum of -100 and a maximum of 100 on both the x-axis and the y-axis. What is the use of this plot?
+
+- False Positive Relationships
+- Correlation vs. Causation
+- Increased Date = Increased Information = Better Analysis
+
+In the following slides, we will present our code and how we were able to build our Random Number Plot.
+
+## ui.R - Part 1
+To build out application, we need to write both a user interface(ui.R) and a server script (server.R). 
+
+Please notice the use of the following functions in our code:
+
+- numericInput() allows the user to enter any number
+- checkboxInput() creates boxes that can be checked 
+- plotOutput() displays a plot
+- sliderInput() allows the user to define the min. and max of the axis
+```{r, eval = FALSE}
+library(shiny)
+shinyUI(fluidPage(
+  titlePanel("Creating Data Products With Shiny"),
+  sidebarLayout(
+    sidebarPanel(
+...
+```
+
+## ui.R - Part 2
+```{r, eval = FALSE}
+...
+      numericInput("numeric", "How Many Random Numbers Should Be Plotted?",
+                   value = 1000, min = 1, max = 1000, step = 1),
+      sliderInput("sliderX", "Pick Minimum and Maximum X Values",
+                  -100, 100, value = c(-50, 50)),
+      sliderInput("sliderY", "Pick Minimum and Maximum Y Values",
+                  -100, 100, value = c(-50, 50)),
+      checkboxInput("show_xlab", "Show/Hide X Axis Label", value = TRUE),
+      checkboxInput("show_ylab", "Show/Hide Y Axis Label", value = TRUE),
+      checkboxInput("show_title", "Show/Hide Title")
+    ),
+    mainPanel(
+        h3("Graph of Random Points"),
+        plotOutput("plot1")
+    )
+  )
+))
+```
+
+## server.R
+
+```{r}
+library(shiny)
+shinyServer(function(input, output){
+  output$plot1 <- renderPlot({
+    set.seed(2017-05-25)
+    number_of_points <- input$numeric
+    minX <- input$sliderX[1]
+    maxX <- input$sliderX[2]
+    minY <- input$sliderX[1]
+    maxY <- input$sliderX[2]
+    dataX <- runif(number_of_points, minX, maxX)
+    dataY <- runif(number_of_points, minY, maxY)
+    xlab <- ifelse(input$show_xlab, "X Axis", "")
+    ylab <- ifelse(input$show_xlab, "Y Axis", "")
+    main <- ifelse(input$show_title, "Title", "")
+    plot(dataX, dataY, xlab = xlab, ylab = ylab, main = main,
+         xlim = c(-100, 100), ylim = c(-100, 100))
+  })
+})
+```
